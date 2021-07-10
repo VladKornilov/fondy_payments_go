@@ -47,7 +47,6 @@ type Application struct {
 }
 
 func CreateApplication() (*Application, error) {
-
 	db, err := database.OpenDatabase()
 	if err != nil { return nil, err }
 	cfg, err := NewAppConfig()

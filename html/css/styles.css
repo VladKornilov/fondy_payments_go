@@ -103,6 +103,11 @@ html {
     box-shadow: inset 0 2px 5px 0 rgba(0,0,0,.09);
 }
 
+.buy_form {
+    display: flex;
+    justify-content: space-around;
+}
+
 .button{
     width: 200px;
     height: 40px;
@@ -121,6 +126,9 @@ html {
 .button:hover{
     background: #C0C0C0;
     text-decoration: blue;
+}
+.buy_button{
+    height: 150px;
 }
 
 /* Общие свойства для классов иконок в классе кнопки */

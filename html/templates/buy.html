@@ -26,20 +26,15 @@
             <div class="balance_main">
 
                 <!-- Форма для POST запроса  -->
-                <div class="balance_form">
-                    <div>
-                        Ваши алмазы:
-                        <br>
-                        <img class="diamond_icon"></img>
-                        <span style="font-size: 300%">{{.Diamonds}}</span>
-                    </div>
-<!--                    <form action="/buy" id="buy_form">-->
-<!--                        <div class="button" onclick="document.forms['buy_form'].submit()">-->
-<!--                            <img class="diamond_icon"></img>-->
-<!--                            <div class="text">Купить алмазы</div>-->
-<!--                        </div>-->
-
-<!--                    </form>-->
+                <div class="balance_form buy_form">
+                    {{ range $element := .Products }}
+                    <form id="{{ $element.ProductName }}_form" action="/buy/{{ $element.ProductId }}" method="POST">
+                        <div class="button buy_button" onClick="document.forms['{{ $element.ProductName }}_form'].submit();">
+                            <div class="icon"></div>
+                            <div class="text">{{ $element.ProductName }}</div>
+                        </div>
+                    </form>
+                    {{end}}
                 </div>
             </div>
         </div>

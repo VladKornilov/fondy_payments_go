@@ -17,7 +17,10 @@ func main() {
 	//sign := fondy.CalculateSignature(request.Amount, request.Currency, request.OrderDesc, request.OrderId)
 	//fmt.Printf("%x", sign)
 
+
+
 	app, err := server.CreateApplication()
+
 	if err != nil {
 		panic(err)
 	}

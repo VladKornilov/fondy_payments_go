@@ -78,6 +78,27 @@ func (d Database) GetUserByUUID(uuid string) (entities.User, error) {
 	return u, err
 }
 
+func (d Database) GetProducts() []entities.Product {
+	rows, err := d.db.Query("SELECT * from products")
+	if err != nil {
+		println(err.Error())
+		return nil
+	}
+	defer rows.Close()
+	var products []entities.Product
+
+	for rows.Next() {
+		p := entities.Product{}
+		err = rows.Scan(&p.ProductId, &p.ProductName, &p.Price)
+		if err != nil {
+			println(err.Error())
+			continue
+		}
+		products = append(products, p)
+	}
+	return products
+}
+
 func (d Database) GetPurchases() []entities.Purchase {
 	rows, err := d.db.Query("SELECT * from purchases")
 	if err != nil {

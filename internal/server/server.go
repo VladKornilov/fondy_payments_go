@@ -11,6 +11,7 @@ import (
 var app *Application
 func (a Application)StartServer() {
 	app = &a
+	app.db.InsertProduct(entities.Product{ProductName: "test2", Price: 2000})
 	addPageListeners()
 }
 
@@ -49,26 +50,20 @@ func startPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func buyPage(w http.ResponseWriter, r *http.Request) {
-	idCookie, err := r.Cookie("uuid")
-
-	var id string
-	if err != nil {
-		id = uuid.New().String()
-		err = app.db.InsertUser(entities.User{Uuid: id})
-		if logErr(err) { return }
-	} else {
-		id = idCookie.Value
-	}
-
 	bytes, err := ioutil.ReadFile("html/templates/buy.html")
 	if logErr(err) { return }
 
 	tpl, err := template.New("buy").Parse(string(bytes))
 	if logErr(err) { return }
 
-	user, err := app.db.GetUserByUUID(id)
-	if logErr(err) { return }
+	products := app.db.GetProducts()
 
-	err = tpl.Execute(w, user)
+	data := struct {
+		Products []entities.Product
+	} {
+		products,
+	}
+
+	err = tpl.Execute(w, data)
 	if logErr(err) { return }
 }
