@@ -1,11 +1,9 @@
 package server
 
 import (
-	"fmt"
+	"html/template"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
 )
 
 func (app Application)StartServer() {
@@ -14,6 +12,8 @@ func (app Application)StartServer() {
 
 func addPageListeners() {
 	http.HandleFunc("/", startPage)
+	http.HandleFunc("/buy", buyPage)
+	http.Handle("/html/", http.StripPrefix("/html/", http.FileServer(http.Dir("./html"))))
 
 	err := http.ListenAndServe(":8888", nil)
 	if err != nil {
@@ -23,19 +23,30 @@ func addPageListeners() {
 }
 
 func startPage(w http.ResponseWriter, r *http.Request) {
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println(path)
-	b, err := ioutil.ReadFile("internal/templates/index.hbs")
+	b, err := ioutil.ReadFile("html/templates/index.html")
 	if err != nil {
 		println(err.Error())
 		return
 	}
-	_, err = fmt.Fprintf(w, string(b))
+	tpl, err := template.New("index").Parse(string(b))
 	if err != nil {
 		println(err.Error())
 		return
 	}
+
+	product := struct {
+		Title string
+	} {
+		Title: "Paradise Grind",
+	}
+
+	err = tpl.Execute(w, product)
+	if err != nil {
+		println(err.Error())
+		return
+	}
+}
+
+func buyPage(w http.ResponseWriter, r *http.Request) {
+
 }
