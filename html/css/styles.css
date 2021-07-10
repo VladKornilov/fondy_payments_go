@@ -70,10 +70,11 @@ html {
     max-height: 300px;
 }
 
-.diamond_img {
+.diamond_icon {
     width: 100%;
-    max-width: 40px;
-    max-height: 40px;
+    max-width: 30px;
+    max-height: 30px;
+    content: url(../images/diamond.png);
 }
 
 .balance_main {
@@ -103,7 +104,7 @@ html {
 }
 
 .button{
-    width: 150px;
+    width: 200px;
     height: 40px;
     line-height: 40px;
     display: flex;
@@ -113,9 +114,13 @@ html {
     background: #fff;
     text-decoration: none;
     color: #747474;
-    border-radius: 2px;
+    border-radius: 8px;
     white-space: nowrap;
     cursor: pointer;
+}
+.button:hover{
+    background: #C0C0C0;
+    text-decoration: blue;
 }
 
 /* Общие свойства для классов иконок в классе кнопки */
