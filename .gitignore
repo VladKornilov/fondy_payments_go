@@ -1,6 +1,7 @@
 # JetBrains
 .idea
 other
+db
 
 # Binaries for programs and plugins
 *.exe

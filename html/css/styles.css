@@ -52,14 +52,14 @@ html {
     clear:both
 }
 
-.auth_root{
+.balance_root{
     width: auto;
     min-width: 630px;
     position: relative;
     z-index: 3;
 }
 
-.auth_header {
+.balance_header {
     position: relative;
     z-index:3
 }
@@ -70,7 +70,13 @@ html {
     max-height: 300px;
 }
 
-.buy_main {
+.diamond_img {
+    width: 100%;
+    max-width: 40px;
+    max-height: 40px;
+}
+
+.balance_main {
     overflow: hidden;
     width: 100%;
     margin: 0 auto;
@@ -81,7 +87,7 @@ html {
     /* padding: 12px 0 25px; */
 }
 
-.buy_form{
+.balance_form{
     max-width: 585px;
     padding: 20px 20px 20px 20px;
     position: relative;
@@ -129,18 +135,6 @@ html {
     white-space: nowrap;
     padding-left: 10px;
     text-align: left;
-}
-
-.buy_footer {
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    align-content: center;
-    max-width: 500px;
-    margin: 0 auto;
 }
 
 .footer {

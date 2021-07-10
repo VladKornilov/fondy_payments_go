@@ -15,6 +15,11 @@ type Database struct {
 func (d Database) Close() error {
 	return d.db.Close()
 }
+
+func (d Database) createUsers() error {
+	_, err := d.db.Exec(entities.CreateUsers)
+	return err
+}
 func (d Database) createProducts() error {
 	_, err := d.db.Exec(entities.CreateProducts)
 	return err
@@ -27,18 +32,28 @@ func (d Database) createIndex() error {
 	_, err := d.db.Exec("CREATE INDEX purchases_products_idx ON purchases (product_id);")
 	return err
 }
+
 func (d Database) Create() error {
-	err := d.createProducts()
+	err := d.createUsers()
+	if err != nil { return err }
+	err = d.createProducts()
 	if err != nil { return err }
 	err = d.createPurchases()
 	if err != nil { return err }
 	err = d.createIndex()
 	return err
 }
-func (d Database) InsertProduct(p entities.Product) error {
-	_, err := d.db.Exec("INSERT INTO products VALUES ($1, $2, $3)", p.ProductId, p.ProductName, p.Price)
+
+func (d Database) InsertUser(u entities.User) error {
+	_, err := d.db.Exec("INSERT INTO users (uuid) VALUES ($1)", u.Uuid)
 	return err
 }
+
+func (d Database) InsertProduct(p entities.Product) error {
+	_, err := d.db.Exec("INSERT INTO products (product_name, price) VALUES ($1, $2)", p.ProductName, p.Price)
+	return err
+}
+
 func (d Database) InsertPurchase(p entities.Purchase) error {
 	var params string
 	var values string
@@ -54,6 +69,13 @@ func (d Database) InsertPurchase(p entities.Purchase) error {
 	_, err := d.db.Exec("INSERT INTO purchases " + params + " VALUES " + values,
 		p.ProductId, p.PurchaseStatus, p.PurchaseTime)
 	return err
+}
+
+func (d Database) GetUserByUUID(uuid string) (entities.User, error) {
+	row := d.db.QueryRow("SELECT * from users where uuid = $1", uuid)
+	u := entities.User{}
+	err := row.Scan(&u.UserId, &u.Uuid, &u.Diamonds)
+	return u, err
 }
 
 func (d Database) GetPurchases() []entities.Purchase {

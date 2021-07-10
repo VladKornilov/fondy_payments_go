@@ -8,10 +8,6 @@ import (
 	"strconv"
 )
 
-type Handlebars struct {
-	Title string
-}
-
 type AppConfig struct {
 	SiteUrl *url.URL
 	MerchantId int
@@ -32,13 +28,13 @@ func NewAppConfig() (*AppConfig, error) {
 		return nil, errors.New("MERCHANT_PASSWORD was not specified")
 	}
 
-	url, err := url.Parse(rawurl)
+	strurl, err := url.Parse(rawurl)
 	if err != nil { return nil, err }
 	id, err := strconv.Atoi(merchID)
 	if err != nil { return nil, err }
 
 	cfg := new(AppConfig)
-	cfg.SiteUrl = url
+	cfg.SiteUrl = strurl
 	cfg.MerchantId = id
 	cfg.MerchantPassword= merchPass
 	return cfg, nil
@@ -46,7 +42,6 @@ func NewAppConfig() (*AppConfig, error) {
 
 type Application struct {
 	db database.Database
-	templates []Handlebars
 	//HttpClient
 	config *AppConfig
 }
@@ -57,7 +52,6 @@ func CreateApplication() (*Application, error) {
 	if err != nil { return nil, err }
 	cfg, err := NewAppConfig()
 	if err != nil { return nil, err }
-	// TODO: templates
 
 	app := new(Application)
 	app.db = db
@@ -65,6 +59,6 @@ func CreateApplication() (*Application, error) {
 	return app, nil
 }
 
-func (app Application) Close() error {
-	return app.db.Close()
+func (a Application) Close() error {
+	return a.db.Close()
 }

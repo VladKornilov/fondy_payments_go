@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>{{.Title}}</title>
+    <title>Баланс</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -18,27 +18,22 @@
     </div>
 
     <div class="main">
-        <!-- Форма аутентификации  -->
-        <div class="buy_root">
-            <!-- Заголовок аутентификации  -->
-            <div class="buy_header">
+        <div class="balance_root">
+            <div class="balance_header">
                 <img src="html/images/game_logo.png" alt="game_logo.png" class="game_logo_img">
             </div>
 
-            <!-- Середина аутентификации по-высоте  -->
-            <div class="buy_main">
-                <!-- Форма для POST запроса  -->
-                <div class="buy_form">
-                    <!-- Надпись над блоком кнопок логина  -->
-                    <div class="auth_login_buttons_title">Купить алмазы:</div>
-                    <!-- Блок с горизонтальными кнопками логина  -->
-                    <div class="auth_login_buttons_frame">
-                        <!-- Блок с кнопками  -->
-                        <div class="auth_login_buttons">
+            <div class="balance_main">
 
-                        </div>
+                <!-- Форма для POST запроса  -->
+                <div class="balance_form">
+                    <div>
+                        Ваши алмазы:
+                        <br>
+                        <img src="html/images/diamond.png" alt="diamond.png" class="diamond_img">
+                        <span style="font-size: 300%">{{.Diamonds}}</span>
                     </div>
-                    </form>
+                    <div class="buy_buttons_title">Купить алмазы:</div>
                 </div>
             </div>
         </div>

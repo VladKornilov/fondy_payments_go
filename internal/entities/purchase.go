@@ -15,8 +15,7 @@ const CreatePurchases =
 	"product_id INTEGER NOT NULL,\n" +
 	"purchase_time TIMESTAMP NOT NULL \n" +
 	"DEFAULT(DATETIME('now','localtime')),\n" +
-	"purchase_status VARCHAR(30) NOT NULL \n" +
-	"DEFAULT('not_consumed'),\n\n" +
+	"purchase_status VARCHAR(30) NOT NULL DEFAULT('not_consumed'),\n\n" +
 
 	"CONSTRAINT product_id_ref \n" +
 	"FOREIGN KEY (product_id) \n" +

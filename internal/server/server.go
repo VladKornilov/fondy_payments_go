@@ -1,12 +1,16 @@
 package server
 
 import (
+	"github.com/VladKornilov/fondy_payments_go/internal/entities"
+	"github.com/google/uuid"
 	"html/template"
 	"io/ioutil"
 	"net/http"
 )
 
-func (app Application)StartServer() {
+var app *Application
+func (a Application)StartServer() {
+	app = &a
 	addPageListeners()
 }
 
@@ -16,35 +20,32 @@ func addPageListeners() {
 	http.Handle("/html/", http.StripPrefix("/html/", http.FileServer(http.Dir("./html"))))
 
 	err := http.ListenAndServe(":8888", nil)
-	if err != nil {
-		println(err.Error())
-		return
-	}
+	if logErr(err) { return }
 }
 
 func startPage(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadFile("html/templates/index.html")
+	idCookie, err := r.Cookie("uuid")
+
+	var id string
 	if err != nil {
-		println(err.Error())
-		return
-	}
-	tpl, err := template.New("index").Parse(string(b))
-	if err != nil {
-		println(err.Error())
-		return
+		id = uuid.New().String()
+		err = app.db.InsertUser(entities.User{Uuid: id})
+		if logErr(err) { return }
+	} else {
+		id = idCookie.Value
 	}
 
-	product := struct {
-		Title string
-	} {
-		Title: "Paradise Grind",
-	}
+	bytes, err := ioutil.ReadFile("html/templates/index.html")
+	if logErr(err) { return }
 
-	err = tpl.Execute(w, product)
-	if err != nil {
-		println(err.Error())
-		return
-	}
+	tpl, err := template.New("index").Parse(string(bytes))
+	if logErr(err) { return }
+
+	user, err := app.db.GetUserByUUID(id)
+	if logErr(err) { return }
+
+	err = tpl.Execute(w, user)
+	if logErr(err) { return }
 }
 
 func buyPage(w http.ResponseWriter, r *http.Request) {
