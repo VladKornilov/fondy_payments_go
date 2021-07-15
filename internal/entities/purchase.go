@@ -3,7 +3,7 @@ package entities
 import "time"
 
 type Purchase struct {
-	PurchaseId int
+	PurchaseId string
 	ProductId int
 	PurchaseTime time.Time
 	PurchaseStatus string
@@ -11,7 +11,7 @@ type Purchase struct {
 
 const CreatePurchases =
 	"CREATE TABLE purchases (\n" +
-	"purchase_id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+	"purchase_id STRING PRIMARY KEY,\n" +
 	"product_id INTEGER NOT NULL,\n" +
 	"purchase_time TIMESTAMP NOT NULL \n" +
 	"DEFAULT(DATETIME('now','localtime')),\n" +

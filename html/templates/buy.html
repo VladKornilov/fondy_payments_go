@@ -28,10 +28,12 @@
                 <!-- Форма для POST запроса  -->
                 <div class="balance_form buy_form">
                     {{ range $element := .Products }}
-                    <form id="{{ $element.ProductName }}_form" action="/buy/{{ $element.ProductId }}" method="POST">
+                    <form id="{{ $element.ProductName }}_form" action="/purchase/{{ $element.ProductId }}" method="POST">
                         <div class="button buy_button" onClick="document.forms['{{ $element.ProductName }}_form'].submit();">
                             <div class="icon"></div>
                             <div class="text">{{ $element.ProductName }}</div>
+                            <br>
+                            <div class="text">${{ calcPrice $element.Price }}</div>
                         </div>
                     </form>
                     {{end}}

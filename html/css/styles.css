@@ -104,8 +104,8 @@ html {
 }
 
 .buy_form {
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
 }
 
 .button{

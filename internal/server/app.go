@@ -43,7 +43,7 @@ func NewAppConfig() (*AppConfig, error) {
 type Application struct {
 	db database.Database
 	//HttpClient
-	config *AppConfig
+	Config *AppConfig
 }
 
 func CreateApplication() (*Application, error) {
@@ -54,7 +54,7 @@ func CreateApplication() (*Application, error) {
 
 	app := new(Application)
 	app.db = db
-	app.config = cfg
+	app.Config = cfg
 	return app, nil
 }
 

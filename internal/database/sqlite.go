@@ -98,6 +98,12 @@ func (d Database) GetProducts() []entities.Product {
 	}
 	return products
 }
+func (d Database) GetProductById(id string) (entities.Product, error) {
+	row := d.db.QueryRow("SELECT * from products where product_id = $1", id)
+	p := entities.Product{}
+	err := row.Scan(&p.ProductId, &p.ProductName, &p.Price)
+	return p, err
+}
 
 func (d Database) GetPurchases() []entities.Purchase {
 	rows, err := d.db.Query("SELECT * from purchases")
