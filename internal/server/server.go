@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -23,13 +24,15 @@ func (a Application)StartServer() {
 }
 
 func addPageListeners() {
-
-	http.HandleFunc("/buy", buyPage)
-	http.HandleFunc("/purchase/", fondyRedirect)
+	response, _ := os.LookupEnv("RESPONSE_URL")
+	port, _ := os.LookupEnv("SITE_PORT")
+	http.HandleFunc("/buy", handleBuyRequest)
+	http.HandleFunc("/purchase/", handleFondyRedirect)
+	http.HandleFunc(response, handleResponse)
 	http.HandleFunc("/", startPage)
 	http.Handle("/html/", http.StripPrefix("/html/", http.FileServer(http.Dir("./html"))))
 
-	err := http.ListenAndServe(":8888", nil)
+	err := http.ListenAndServeTLS(port, "ssl/server.crt", "ssl/server.key", nil)
 	if logger.LogErr(err) { return }
 }
 
@@ -51,10 +54,10 @@ func startPage(w http.ResponseWriter, r *http.Request) {
 		userId = idCookie.Value
 	}
 
-	bytes, err := ioutil.ReadFile("html/templates/index.html")
+	data, err := ioutil.ReadFile("html/templates/index.html")
 	if logger.LogErr(err) { return }
 
-	tpl, err := template.New("index").Parse(string(bytes))
+	tpl, err := template.New("index").Parse(string(data))
 	if logger.LogErr(err) { return }
 
 	user, err := app.db.GetUserByUUID(userId)
@@ -64,7 +67,7 @@ func startPage(w http.ResponseWriter, r *http.Request) {
 	if logger.LogErr(err) { return }
 }
 
-func buyPage(w http.ResponseWriter, r *http.Request) {
+func handleBuyRequest(w http.ResponseWriter, r *http.Request) {
 	data, err := ioutil.ReadFile("html/templates/buy.html")
 	if logger.LogErr(err) { return }
 
@@ -72,7 +75,9 @@ func buyPage(w http.ResponseWriter, r *http.Request) {
 		"calcPrice": func (price int) string {
 			whole := price / 100
 			cents := price % 100
-			return strconv.Itoa(whole) + "," + strconv.Itoa(cents)
+			zeroStr := ""
+			if cents < 10 { zeroStr = "0" }
+			return strconv.Itoa(whole) + "," + zeroStr + strconv.Itoa(cents)
 		},
 	}
 
@@ -96,7 +101,7 @@ func buyPage(w http.ResponseWriter, r *http.Request) {
 
 // 4) торговец формирует host-to-host запрос на URL
 //    https://pay.fondy.eu/api/checkout/url/, передавая параметры методом HTTPS POST
-func fondyRedirect(w http.ResponseWriter, r *http.Request) {
+func handleFondyRedirect(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" { return }
 	//idCookie, err := r.Cookie("uuid")
 	//if LogErr(err) { return }
@@ -112,7 +117,11 @@ func fondyRedirect(w http.ResponseWriter, r *http.Request) {
 	product, err := app.db.GetProductById(prodName)
 	if logger.LogErr(err) { return }
 
-	request := fondy.MakeRequest(app.Config.MerchantId, product)
+	idCookie, err := r.Cookie("uuid")
+	if err != nil { return }
+	userId := idCookie.Value
+
+	request := fondy.MakeRequest(userId, product)
 	jsonObj := struct {
 		Request fondy.Request `json:"request"`
 	}{ request }
@@ -142,4 +151,48 @@ func fondyRedirect(w http.ResponseWriter, r *http.Request) {
 	logger.LogData("Inter Response success: Checkout URL = " + interResp.Response.CheckoutUrl)
 
 	// 6) Торговец перенаправляет покупателя на checkout_url
+	checkoutUrl := interResp.Response.CheckoutUrl
+	http.Redirect(w, r, checkoutUrl, http.StatusSeeOther)
+
+	// Покупатель вводит платежные реквизиты на сайте платежного шлюза FONDY,
+	// платежный шлюз осуществляет списание средств через внешнюю платежную систему (банк-эквайер)
+}
+
+
+func handleResponse(w http.ResponseWriter, r *http.Request) {
+	//if r.Method != "POST" { return }
+
+	body, err := ioutil.ReadAll(r.Body)
+	if logger.LogErr(err) { return }
+	logger.LogData(string(body))
+
+	values, err := url.ParseQuery(string(body))
+	//for i, value := range values {
+	//	println(i + ": " + value[0])
+	//}
+	//userId := values["merchant_data"][0]
+	amount, _ := strconv.Atoi(values["amount"][0])
+	amount /= 100
+
+	//idCookie, err := r.Cookie("uuid")
+	//if logger.LogErr(err) { return }
+	//userId := idCookie.Value
+
+	// 12) Торговец у себя на сайте отображает страницу с результатом оплаты
+	data, err := ioutil.ReadFile("html/templates/purchase_success.html")
+	if logger.LogErr(err) { return }
+
+	tpl, err := template.New("purchaseSuccess").Parse(string(data))
+	if logger.LogErr(err) { return }
+
+	//user, err := app.db.GetUserByUUID(userId)
+	//if logger.LogErr(err) { return }
+
+	err = tpl.Execute(w,
+		struct {
+		Amount int
+		} {
+			amount,
+		})
+	if logger.LogErr(err) { return }
 }

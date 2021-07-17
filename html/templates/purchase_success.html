@@ -26,15 +26,11 @@
             <div class="balance_main">
                 <div class="balance_form">
                     <div>
-                        Ваши алмазы:
-                        <br>
-                        <img class="diamond_icon"></img>
-                        <span style="font-size: 300%">{{.Diamonds}}</span>
+                        Спасибо! Ваша оплата получена. Зачислено {{.Amount}} алмазов.
                     </div>
-                    <form action="/buy" id="buy_form" method="POST">
-                        <div class="button" onclick="document.forms['buy_form'].submit()">
-                            <img class="diamond_icon"></img>
-                            <div class="text">Купить алмазы</div>
+                    <form action="/" id="return_form" method="POST">
+                        <div class="button" onclick="document.forms['return_form'].submit()">
+                            <div class="text">Возврат на главную</div>
                         </div>
 
                     </form>

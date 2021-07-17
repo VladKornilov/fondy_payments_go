@@ -2,6 +2,7 @@
 .idea
 other
 db
+ssl
 
 # Binaries for programs and plugins
 *.exe

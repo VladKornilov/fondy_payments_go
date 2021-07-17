@@ -3,6 +3,7 @@ package fondy
 import (
 	"github.com/VladKornilov/fondy_payments_go/internal/entities"
 	"github.com/google/uuid"
+	"os"
 	"strconv"
 )
 
@@ -18,21 +19,29 @@ type Request struct {
 	Signature			string `json:"signature"`
 	Amount				int    `json:"amount"`
 	Currency			string `json:"currency"`
-	Version				string `json:"version"`
 	MerchantData		string `json:"merchant_data"`
+	ResponseUrl			string `json:"response_url"`
 	ServerCallbackUrl	string `json:"server_callback_url"`
 	ProductId			string `json:"product_id"`
 }
-func MakeRequest(merchantId int, product entities.Product) Request {
+func MakeRequest(customerId string, product entities.Product) Request {
+
 	uuid := uuid.New().String()
+	merchantIdStr, _ := os.LookupEnv("MERCHANT_ID")
+	merchantId, _ := strconv.Atoi(merchantIdStr)
+	siteUrl, _ := os.LookupEnv("SITE_URL")
+	port, _ := os.LookupEnv("SITE_PORT")
+	responseUrl, _ := os.LookupEnv("RESPONSE_URL")
+	callbackUrl, _ := os.LookupEnv("CALLBACK_URL")
 	request := Request{
 		OrderId:    uuid,
 		MerchantId: merchantId,
 		OrderDesc:  product.ProductName,
 		Amount:     product.Price,
 		Currency:   "USD",
-		ServerCallbackUrl: "https://127.0.0.1/purchase_server_callback_url",
-		MerchantData: "our_custom_payload",
+		ResponseUrl: siteUrl + port + responseUrl,
+		ServerCallbackUrl: siteUrl + port + callbackUrl,
+		MerchantData: customerId,
 
 		ProductId:  strconv.Itoa(product.ProductId),
 	}
