@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/VladKornilov/fondy_payments_go/internal/entities"
+	"github.com/VladKornilov/fondy_payments_go/internal/logger"
 	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"strings"
@@ -40,7 +41,9 @@ func (d Database) Create() error {
 	if err != nil { return err }
 	err = d.createPurchases()
 	if err != nil { return err }
-	err = d.createIndex()
+	//err = d.createIndex()
+	//if err != nil { return err }
+	err = d.InsertProducts()
 	return err
 }
 
@@ -49,8 +52,14 @@ func (d Database) InsertUser(u entities.User) error {
 	return err
 }
 
-func (d Database) InsertProduct(p entities.Product) error {
-	_, err := d.db.Exec("INSERT INTO products (product_name, price) VALUES ($1, $2)", p.ProductName, p.Price)
+func (d Database) InsertProducts() error {
+	cnt := 0
+	err := d.db.QueryRow("SELECT COUNT(*) FROM products").Scan(&cnt)
+	if err != nil { return err }
+	if cnt == 0 {
+		logger.LogData("Inserting Products list into DB")
+		_, err = d.db.Exec(entities.InsertProducts)
+	}
 	return err
 }
 
@@ -78,6 +87,12 @@ func (d Database) GetUserByUUID(uuid string) (entities.User, error) {
 	return u, err
 }
 
+func (d Database) UpdateUser(user entities.User) error {
+	query := "UPDATE users SET diamonds = $1 WHERE uuid = $2"
+	_, err := d.db.Exec(query, user.Diamonds, user.Uuid)
+	return err
+}
+
 func (d Database) GetProducts() []entities.Product {
 	rows, err := d.db.Query("SELECT * from products")
 	if err != nil {
@@ -89,7 +104,7 @@ func (d Database) GetProducts() []entities.Product {
 
 	for rows.Next() {
 		p := entities.Product{}
-		err = rows.Scan(&p.ProductId, &p.ProductName, &p.Price)
+		err = rows.Scan(&p.ProductId, &p.ProductName, &p.Price, &p.Value)
 		if err != nil {
 			println(err.Error())
 			continue
@@ -101,7 +116,7 @@ func (d Database) GetProducts() []entities.Product {
 func (d Database) GetProductById(id string) (entities.Product, error) {
 	row := d.db.QueryRow("SELECT * from products where product_id = $1", id)
 	p := entities.Product{}
-	err := row.Scan(&p.ProductId, &p.ProductName, &p.Price)
+	err := row.Scan(&p.ProductId, &p.ProductName, &p.Price, &p.Value)
 	return p, err
 }
 

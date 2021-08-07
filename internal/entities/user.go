@@ -7,7 +7,7 @@ type User struct {
 }
 
 const CreateUsers =
-	"CREATE TABLE users (\n    " +
+	"CREATE TABLE IF NOT EXISTS users (\n    " +
 		"  user_id INTEGER PRIMARY KEY AUTOINCREMENT,\n    " +
 		"  uuid VARCHAR(64) UNIQUE,\n    " +
 		"  diamonds INTEGER NOT NULL DEFAULT(0)\n" +

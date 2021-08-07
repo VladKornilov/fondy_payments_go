@@ -10,7 +10,7 @@ type Purchase struct {
 }
 
 const CreatePurchases =
-	"CREATE TABLE purchases (\n" +
+	"CREATE TABLE IF NOT EXISTS purchases (\n" +
 	"purchase_id STRING PRIMARY KEY,\n" +
 	"product_id INTEGER NOT NULL,\n" +
 	"purchase_time TIMESTAMP NOT NULL \n" +

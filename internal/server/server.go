@@ -19,9 +19,11 @@ import (
 var app *Application
 func (a Application)StartServer() {
 	app = &a
-	app.db.InsertProduct(entities.Product{ProductName: "test2", Price: 2000})
+	err := app.db.Create()
+	if logger.LogErr(err) { return }
 	addPageListeners()
 }
+
 
 func addPageListeners() {
 	response, _ := os.LookupEnv("RESPONSE_URL")
@@ -38,6 +40,8 @@ func addPageListeners() {
 
 func startPage(w http.ResponseWriter, r *http.Request) {
 	idCookie, err := r.Cookie("uuid")
+
+
 
 	var userId string
 	if err != nil {
@@ -167,16 +171,19 @@ func handleResponse(w http.ResponseWriter, r *http.Request) {
 	logger.LogData(string(body))
 
 	values, err := url.ParseQuery(string(body))
-	//for i, value := range values {
-	//	println(i + ": " + value[0])
-	//}
-	//userId := values["merchant_data"][0]
-	amount, _ := strconv.Atoi(values["amount"][0])
-	amount /= 100
 
-	//idCookie, err := r.Cookie("uuid")
-	//if logger.LogErr(err) { return }
-	//userId := idCookie.Value
+	response := fondy.GetFinalResponse(values)
+
+
+	product, err := app.db.GetProductById(response.ProductId)
+	if logger.LogErr(err) { return }
+
+	userId := response.MerchantData
+	user, err := app.db.GetUserByUUID(userId)
+	if logger.LogErr(err) { return }
+	user.Diamonds += product.Value
+
+	_ = app.db.UpdateUser(user)
 
 	// 12) Торговец у себя на сайте отображает страницу с результатом оплаты
 	data, err := ioutil.ReadFile("html/templates/purchase_success.html")
@@ -185,14 +192,13 @@ func handleResponse(w http.ResponseWriter, r *http.Request) {
 	tpl, err := template.New("purchaseSuccess").Parse(string(data))
 	if logger.LogErr(err) { return }
 
-	//user, err := app.db.GetUserByUUID(userId)
-	//if logger.LogErr(err) { return }
+
 
 	err = tpl.Execute(w,
 		struct {
 		Amount int
 		} {
-			amount,
+			product.Value,
 		})
 	if logger.LogErr(err) { return }
 }
