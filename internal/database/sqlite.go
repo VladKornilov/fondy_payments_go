@@ -68,15 +68,15 @@ func (d Database) InsertPurchase(p entities.Purchase) error {
 	var values string
 	//p.PurchaseTime = time.Now()
 	if p.PurchaseStatus != "" {
-		params = "(product_id, purchase_status)"
-		values = "($1, $2)"
+		params = "(purchase_id, product_id, user_id, purchase_status)"
+		values = "($1, $2, $3, $4)"
 	} else {
-		params = "(product_id)"
-		values = "($1)"
+		params = "(purchase_id, product_id, user_id)"
+		values = "($1, $2, $3)"
 	}
 
 	_, err := d.db.Exec("INSERT INTO purchases " + params + " VALUES " + values,
-		p.ProductId, p.PurchaseStatus, p.PurchaseTime)
+		p.PurchaseId ,p.ProductId, p.UserId, p.PurchaseStatus)
 	return err
 }
 

@@ -173,6 +173,8 @@ func handleResponse(w http.ResponseWriter, r *http.Request) {
 	values, err := url.ParseQuery(string(body))
 
 	response := fondy.GetFinalResponse(values)
+	productId, _ := strconv.Atoi(response.ProductId)
+
 
 
 	product, err := app.db.GetProductById(response.ProductId)
@@ -184,6 +186,14 @@ func handleResponse(w http.ResponseWriter, r *http.Request) {
 	user.Diamonds += product.Value
 
 	_ = app.db.UpdateUser(user)
+
+	purchase := entities.Purchase{
+		PurchaseId:     response.OrderId,
+		ProductId:      productId,
+		UserId:			user.UserId,
+		PurchaseStatus: response.ResponseStatus,
+	}
+	app.db.InsertPurchase(purchase)
 
 	// 12) Торговец у себя на сайте отображает страницу с результатом оплаты
 	data, err := ioutil.ReadFile("html/templates/purchase_success.html")
