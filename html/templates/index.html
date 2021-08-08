@@ -31,10 +31,13 @@
                         <img class="diamond_icon"></img>
                         <span style="font-size: 300%">{{.Diamonds}}</span>
                     </div>
-                    <form action="/buy" id="buy_form" method="POST">
+                    <form action="/buy" id="buy_form" method="GET">
                         <div class="button" onclick="document.forms['buy_form'].submit()">
-                            <img class="diamond_icon"></img>
-                            <div class="text">Купить алмазы</div>
+                            <div class="button_row">
+                                <icon class="diamond_icon"></icon>
+                                <div class="text">Купить</div>
+                            </div>
+
                         </div>
 
                     </form>

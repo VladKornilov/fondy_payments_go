@@ -32,8 +32,12 @@
                         <div class="button buy_button" onClick="document.forms['{{ $element.ProductName }}_form'].submit();">
                             <div class="icon"></div>
                             <div class="text">{{ $element.ProductName }}</div>
-                            <br>
+                            <hr>
                             <div class="text">${{ calcPrice $element.Price }}</div>
+                            <div class="button_row">
+                                <icon class="diamond_icon"></icon>
+                                <div class="text">{{ $element.Value }}</div>
+                            </div>
                         </div>
                     </form>
                     {{end}}

@@ -65,9 +65,8 @@ html {
 }
 
 .game_logo_img {
-    width: 100%;
     max-width: 360px;
-    max-height: 300px;
+    max-height: 200px;
 }
 
 .diamond_icon {
@@ -109,11 +108,11 @@ html {
 }
 
 .button{
-    width: 200px;
+    width: 150px;
     height: 40px;
     line-height: 40px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     background: #fff;
@@ -122,6 +121,7 @@ html {
     border-radius: 8px;
     white-space: nowrap;
     cursor: pointer;
+    margin: 4px;
 }
 .button:hover{
     background: #C0C0C0;
@@ -129,6 +129,12 @@ html {
 }
 .buy_button{
     height: 150px;
+}
+
+.button .button_row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Общие свойства для классов иконок в классе кнопки */
@@ -146,7 +152,6 @@ html {
     font-size: 18px;
     display: inline-block;
     white-space: nowrap;
-    padding-left: 10px;
     text-align: left;
 }
 
