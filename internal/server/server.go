@@ -17,13 +17,31 @@ import (
 )
 
 var app *Application
+var templates map[string] string
+
+
 func (a Application)StartServer() {
 	app = &a
 	err := app.db.Create()
 	if logger.LogErr(err) { return }
+	addPageTemplates()
 	addPageListeners()
 }
 
+func addPageTemplates() {
+	index, err := ioutil.ReadFile("html/templates/index.html")
+	if logger.LogErr(err) { return }
+	buy, err := ioutil.ReadFile("html/templates/buy.html")
+	if logger.LogErr(err) { return }
+	purchaseSuccess, err := ioutil.ReadFile("html/templates/purchase_success.html")
+	if logger.LogErr(err) { return }
+
+	templates = make(map[string] string)
+
+	templates["index"] = string(index)
+	templates["buy"] = string(buy)
+	templates["purchaseSuccess"] = string(purchaseSuccess)
+}
 
 func addPageListeners() {
 	response, _ := os.LookupEnv("RESPONSE_URL")
@@ -41,8 +59,6 @@ func addPageListeners() {
 func startPage(w http.ResponseWriter, r *http.Request) {
 	idCookie, err := r.Cookie("uuid")
 
-
-
 	var userId string
 	if err != nil {
 		userId = uuid.New().String()
@@ -58,10 +74,7 @@ func startPage(w http.ResponseWriter, r *http.Request) {
 		userId = idCookie.Value
 	}
 
-	data, err := ioutil.ReadFile("html/templates/index.html")
-	if logger.LogErr(err) { return }
-
-	tpl, err := template.New("index").Parse(string(data))
+	tpl, err := template.New("index").Parse(templates["index"])
 	if logger.LogErr(err) { return }
 
 	user, err := app.db.GetUserByUUID(userId)
@@ -72,8 +85,6 @@ func startPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBuyRequest(w http.ResponseWriter, r *http.Request) {
-	data, err := ioutil.ReadFile("html/templates/buy.html")
-	if logger.LogErr(err) { return }
 
 	funcMap := template.FuncMap{
 		"calcPrice": func (price int) string {
@@ -85,7 +96,7 @@ func handleBuyRequest(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	tpl, err := template.New("buy").Funcs(funcMap).Parse(string(data))
+	tpl, err := template.New("buy").Funcs(funcMap).Parse(templates["buy"])
 	if logger.LogErr(err) { return }
 
 	products := app.db.GetProducts()
@@ -175,8 +186,6 @@ func handleResponse(w http.ResponseWriter, r *http.Request) {
 	response := fondy.GetFinalResponse(values)
 	productId, _ := strconv.Atoi(response.ProductId)
 
-
-
 	product, err := app.db.GetProductById(response.ProductId)
 	if logger.LogErr(err) { return }
 
@@ -184,8 +193,8 @@ func handleResponse(w http.ResponseWriter, r *http.Request) {
 	user, err := app.db.GetUserByUUID(userId)
 	if logger.LogErr(err) { return }
 	user.Diamonds += product.Value
-
-	_ = app.db.UpdateUser(user)
+	err = app.db.UpdateUser(user)
+	if logger.LogErr(err) { return }
 
 	purchase := entities.Purchase{
 		PurchaseId:     response.OrderId,
@@ -193,17 +202,14 @@ func handleResponse(w http.ResponseWriter, r *http.Request) {
 		UserId:			user.UserId,
 		PurchaseStatus: response.ResponseStatus,
 	}
-	app.db.InsertPurchase(purchase)
+	err = app.db.InsertPurchase(purchase)
+	if logger.LogErr(err) { return }
 
 	// 12) Торговец у себя на сайте отображает страницу с результатом оплаты
-	data, err := ioutil.ReadFile("html/templates/purchase_success.html")
+
+	tpl, err := template.New("purchaseSuccess").Parse(templates["purchaseSuccess"])
 	if logger.LogErr(err) { return }
-
-	tpl, err := template.New("purchaseSuccess").Parse(string(data))
-	if logger.LogErr(err) { return }
-
-
-
+	
 	err = tpl.Execute(w,
 		struct {
 		Amount int
